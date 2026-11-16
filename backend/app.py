@@ -7,21 +7,25 @@ from flask_jwt_extended import JWTManager
 from dotenv import load_dotenv
 
 
-# Environment Variables
+# ==========================================
+# ENVIRONMENT CONFIGURATION
+# ==========================================
+
 load_dotenv()
 
-
-# Database and JWT
 db = SQLAlchemy()
 jwt = JWTManager()
 
 
-# Create Flask Application
+# ==========================================
+# CREATE FLASK APPLICATION
+# ==========================================
+
 def create_app():
 
     app = Flask(__name__)
 
-    # Security Configuration
+    # Security
     app.config["SECRET_KEY"] = os.getenv(
         "SECRET_KEY",
         "development-secret-change-before-deployment"
@@ -32,13 +36,12 @@ def create_app():
         "development-jwt-secret-change-before-deployment"
     )
 
-    # Database Configuration
+    # Database
     database_url = os.getenv(
         "DATABASE_URL",
         "sqlite:///mg_appstore.db"
     )
 
-    # PostgreSQL URL Compatibility
     if database_url.startswith("postgres://"):
         database_url = database_url.replace(
             "postgres://",
@@ -57,39 +60,86 @@ def create_app():
 
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
+    # Maximum request size: 200 MB
+    app.config["MAX_CONTENT_LENGTH"] = (
+        200 * 1024 * 1024
+    )
+
     # Initialize Extensions
     CORS(app)
 
     db.init_app(app)
     jwt.init_app(app)
 
-    # Home API
+    # ======================================
+    # HOME ROUTE
+    # ======================================
+
     @app.route("/", methods=["GET"])
     def home():
 
         return jsonify({
             "success": True,
             "message": "MG AppStore Backend is Running",
-            "developer": "MG Shankar Tech"
+            "developer": "MG Shankar Tech",
+            "version": "1.0.0"
         }), 200
 
-    # Health Check API
+    # ======================================
+    # HEALTH CHECK
+    # ======================================
+
     @app.route("/api/health", methods=["GET"])
     def health():
 
         return jsonify({
             "success": True,
-            "status": "online"
+            "status": "online",
+            "service": "MG AppStore API"
         }), 200
+
+    # ======================================
+    # ERROR HANDLERS
+    # ======================================
+
+    @app.errorhandler(404)
+    def not_found(error):
+
+        return jsonify({
+            "success": False,
+            "message": "API endpoint not found"
+        }), 404
+
+    @app.errorhandler(413)
+    def file_too_large(error):
+
+        return jsonify({
+            "success": False,
+            "message": "Uploaded file is too large"
+        }), 413
+
+    @app.errorhandler(500)
+    def server_error(error):
+
+        return jsonify({
+            "success": False,
+            "message": "Internal server error"
+        }), 500
 
     return app
 
 
-# Initialize Application
+# ==========================================
+# INITIALIZE APPLICATION
+# ==========================================
+
 app = create_app()
 
 
-# Import Database Models
+# ==========================================
+# IMPORT DATABASE MODELS
+# ==========================================
+
 from models import (
     User,
     StoreApp,
@@ -97,37 +147,48 @@ from models import (
 )
 
 
-# Import API Blueprints
+# ==========================================
+# IMPORT API ROUTES
+# ==========================================
+
 from auth_routes import auth_bp
 from store_routes import store_bp
 from developer_routes import developer_bp
 from download_routes import download_bp
 from admin_routes import admin_bp
+from upload_routes import upload_bp
 
 
-# Register Authentication API
+# ==========================================
+# REGISTER ALL BLUEPRINTS
+# ==========================================
+
 app.register_blueprint(auth_bp)
 
-# Register App Store API
 app.register_blueprint(store_bp)
 
-# Register Developer API
 app.register_blueprint(developer_bp)
 
-# Register Download API
 app.register_blueprint(download_bp)
 
-# Register Admin API
 app.register_blueprint(admin_bp)
 
+app.register_blueprint(upload_bp)
 
-# Create Database Tables
+
+# ==========================================
+# CREATE DATABASE TABLES
+# ==========================================
+
 with app.app_context():
 
     db.create_all()
 
 
-# Run Server
+# ==========================================
+# START SERVER
+# ==========================================
+
 if __name__ == "__main__":
 
     app.run(
