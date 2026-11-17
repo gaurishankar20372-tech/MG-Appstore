@@ -1,5 +1,7 @@
 package com.mgshankartech.appstore.models
 
+import com.google.gson.annotations.SerializedName
+
 // User Registration
 data class RegisterRequest(
     val name: String,
@@ -26,7 +28,10 @@ data class UserDto(
 data class AuthResponse(
     val success: Boolean,
     val message: String,
-    val access_token: String?,
+
+    @SerializedName("token")
+    val accessToken: String?,
+
     val user: UserDto?
 )
 
@@ -34,3 +39,4 @@ data class AuthResponse(
 data class MessageResponse(
     val success: Boolean,
     val message: String
+)
