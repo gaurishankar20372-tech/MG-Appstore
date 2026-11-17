@@ -19,7 +19,7 @@ android {
         buildConfigField(
             "String",
             "API_BASE_URL",
-            "\"https://YOUR-RENDER-BACKEND.onrender.com/\""
+            "\"https://mg-appstore-backen.onrender.com/\""
         )
     }
 
