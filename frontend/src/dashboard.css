@@ -1,0 +1,474 @@
+/* DEVELOPER AND ADMIN DASHBOARD */
+
+.developer-page,
+.admin-page {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  color: #e8edf7;
+}
+
+/* WELCOME HEADER */
+
+.developer-welcome,
+.admin-welcome {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 25px;
+  border: 1px solid #344b78;
+  border-radius: 17px;
+  background: linear-gradient(120deg, #173d85, #35216d);
+}
+
+.developer-welcome > svg,
+.admin-welcome > svg {
+  flex-shrink: 0;
+  color: #bcd2ff;
+}
+
+.developer-welcome h3,
+.admin-welcome h2 {
+  font-size: 22px;
+  margin-bottom: 7px;
+}
+
+.developer-welcome p,
+.admin-welcome p {
+  color: #d1dcf5;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+/* STAT CARDS */
+
+.developer-stats,
+.admin-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 15px;
+}
+
+.admin-stats {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.stat-card {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 22px;
+  background: #151f33;
+  border: 1px solid #2b3953;
+  border-radius: 15px;
+}
+
+.stat-card > svg {
+  color: #6194ff;
+  flex-shrink: 0;
+}
+
+.stat-card strong {
+  display: block;
+  font-size: 25px;
+  font-weight: 800;
+}
+
+.stat-card span {
+  display: block;
+  color: #91a2bf;
+  font-size: 12px;
+  margin-top: 5px;
+}
+
+/* FORM */
+
+.developer-form-section {
+  padding: 25px;
+  background: #151f33;
+  border: 1px solid #2b3953;
+  border-radius: 17px;
+}
+
+.developer-form-section h3 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 19px;
+  margin-bottom: 22px;
+}
+
+.developer-form-section h3 svg {
+  color: #6194ff;
+}
+
+.developer-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.developer-form input,
+.developer-form textarea,
+.auth-card input {
+  width: 100%;
+  padding: 14px 15px;
+  color: #ffffff;
+  background: #0d1729;
+  border: 1px solid #34435f;
+  border-radius: 10px;
+  outline: none;
+  font: inherit;
+  font-size: 14px;
+}
+
+.developer-form input:focus,
+.developer-form textarea:focus,
+.auth-card input:focus {
+  border-color: #4386ff;
+  box-shadow: 0 0 0 3px #4386ff20;
+}
+
+.developer-form textarea {
+  resize: vertical;
+  min-height: 110px;
+}
+
+.developer-form input::placeholder,
+.developer-form textarea::placeholder,
+.auth-card input::placeholder {
+  color: #7d8da8;
+}
+
+.developer-form button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* SECTION HEADINGS */
+
+.section-heading,
+.admin-section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.section-heading h3,
+.admin-section-heading h3 {
+  font-size: 20px;
+}
+
+.refresh-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  color: #dce7ff;
+  background: #1c2c47;
+  border: 1px solid #344b70;
+  border-radius: 9px;
+  font-size: 12px;
+}
+
+.refresh-button:hover {
+  background: #263d61;
+}
+
+/* DEVELOPER APP CARDS */
+
+.developer-app-list,
+.admin-app-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.developer-app-card,
+.admin-app-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 22px;
+  background: #151f33;
+  border: 1px solid #2b3953;
+  border-radius: 15px;
+}
+
+.developer-app-info,
+.admin-app-details {
+  min-width: 0;
+  flex: 1;
+}
+
+.developer-app-info h3,
+.admin-app-details h3 {
+  font-size: 18px;
+  margin-bottom: 9px;
+}
+
+.developer-app-info p,
+.admin-app-details p {
+  color: #9aabc5;
+  font-size: 13px;
+  line-height: 1.6;
+  margin-bottom: 12px;
+  overflow-wrap: anywhere;
+}
+
+.developer-app-info > span {
+  display: inline-block;
+  color: #8fa4c7;
+  font-size: 12px;
+  margin-right: 14px;
+  margin-bottom: 7px;
+}
+
+/* UPLOAD BUTTON */
+
+.upload-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background: #2869df;
+  color: white;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.upload-button:hover {
+  background: #347df5;
+}
+
+/* ADMIN APP META */
+
+.admin-app-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+  margin-bottom: 13px;
+}
+
+.admin-app-meta span {
+  padding: 6px 9px;
+  color: #b6c8e8;
+  background: #1c2b44;
+  border: 1px solid #34435f;
+  border-radius: 7px;
+  font-size: 11px;
+}
+
+.apk-preview-link {
+  display: inline-block;
+  color: #75a5ff;
+  font-size: 12px;
+  text-decoration: none;
+}
+
+.apk-preview-link:hover {
+  text-decoration: underline;
+}
+
+/* ADMIN ACTIONS */
+
+.admin-app-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 120px;
+}
+
+.approve-button,
+.reject-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 11px 13px;
+  color: white;
+  border: none;
+  border-radius: 9px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.approve-button {
+  background: #168b60;
+}
+
+.approve-button:hover {
+  background: #19a875;
+}
+
+.reject-button {
+  background: #a83245;
+}
+
+.reject-button:hover {
+  background: #c43d52;
+}
+
+.approve-button:disabled,
+.reject-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* MESSAGES */
+
+.success-message,
+.error-message {
+  padding: 13px 16px;
+  border-radius: 10px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.success-message {
+  color: #8ef0bd;
+  background: #123d32;
+  border: 1px solid #1b7654;
+}
+
+.error-message {
+  color: #ffabb5;
+  background: #421e2a;
+  border: 1px solid #873747;
+}
+
+/* AUTH PAGE */
+
+.auth-section {
+  display: flex;
+  justify-content: center;
+  padding: 25px 0;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 440px;
+  padding: 30px;
+  text-align: center;
+  background: #151f33;
+  border: 1px solid #2b3953;
+  border-radius: 18px;
+}
+
+.auth-card > svg {
+  color: #6194ff;
+  margin-bottom: 15px;
+}
+
+.auth-card h2 {
+  font-size: 24px;
+  margin-bottom: 9px;
+}
+
+.auth-card > p {
+  color: #91a2bf;
+  font-size: 13px;
+  margin-bottom: 22px;
+}
+
+.auth-card form {
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
+}
+
+.auth-card form button {
+  width: 100%;
+}
+
+.auth-card .error-message {
+  margin-bottom: 15px;
+}
+
+.text-button {
+  margin-top: 20px;
+  padding: 8px;
+  color: #75a5ff;
+  background: transparent;
+  border: none;
+  font-size: 13px;
+}
+
+.text-button:hover {
+  text-decoration: underline;
+}
+
+/* RESPONSIVE */
+
+@media (max-width: 700px) {
+  .developer-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .developer-welcome,
+  .admin-welcome {
+    padding: 19px;
+  }
+
+  .developer-welcome h3,
+  .admin-welcome h2 {
+    font-size: 18px;
+  }
+
+  .developer-app-card,
+  .admin-app-card {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 17px;
+  }
+
+  .admin-app-actions {
+    flex-direction: row;
+  }
+
+  .admin-app-actions button {
+    flex: 1;
+  }
+
+  .upload-button {
+    width: 100%;
+  }
+
+  .developer-form-section {
+    padding: 18px;
+  }
+
+  .section-heading h3,
+  .admin-section-heading h3 {
+    font-size: 17px;
+  }
+}
+
+@media (max-width: 380px) {
+  .admin-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-app-actions {
+    flex-direction: column;
+  }
+
+  .stat-card {
+    padding: 17px;
+  }
+
+  .auth-card {
+    padding: 22px 17px;
+  }
+}
