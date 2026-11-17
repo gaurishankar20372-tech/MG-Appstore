@@ -12,28 +12,24 @@ export async function getApps(category = "") {
 // किसी एक App की जानकारी प्राप्त करें
 export async function getAppDetails(appId) {
   const response = await api.get(`/api/apps/${appId}`);
-
   return response.data;
 }
 
 // सभी उपलब्ध Categories प्राप्त करें
 export async function getCategories() {
   const response = await api.get("/api/categories");
-
   return response.data;
 }
 
 // Store Statistics प्राप्त करें
 export async function getStoreStats() {
   const response = await api.get("/api/store/stats");
-
   return response.data;
 }
 
 // Download History प्राप्त करें
 export async function getDownloadHistory() {
   const response = await api.get("/api/downloads/history");
-
   return response.data;
 }
 
@@ -68,7 +64,6 @@ export async function submitDeveloperApp(appData) {
 // Developer App में APK Upload करें
 export async function uploadAppAPK(appId, file) {
   const formData = new FormData();
-
   formData.append("file", file);
 
   const response = await api.post(
@@ -107,6 +102,15 @@ export async function approveApp(appId) {
 export async function rejectApp(appId) {
   const response = await api.post(
     `/api/admin/apps/${appId}/reject`
+  );
+
+  return response.data;
+}
+
+// Admin द्वारा User को Developer बनाना
+export async function makeUserDeveloper(userId) {
+  const response = await api.post(
+    `/api/admin/users/${userId}/make-developer`
   );
 
   return response.data;
