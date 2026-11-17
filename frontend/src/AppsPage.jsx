@@ -15,12 +15,12 @@ import {
   recordDownload
 } from "./storeApi";
 
-export default function AppsPage() {
+export default function AppsPage({ initialSearch = "" }) {
   const [apps, setApps] = useState([]);
   const [categories, setCategories] = useState([]);
 
   const [selectedCategory, setSelectedCategory] = useState("");
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState(initialSearch);
 
   const [stats, setStats] = useState({
     totalApps: 0,
@@ -31,17 +31,25 @@ export default function AppsPage() {
   const [error, setError] = useState("");
   const [downloadingId, setDownloadingId] = useState(null);
 
+  // Home Page से आने वाला Search शब्द अपडेट करें
+  useEffect(() => {
+    setSearch(initialSearch);
+  }, [initialSearch]);
+
   async function loadData(category = "") {
     setLoading(true);
     setError("");
 
     try {
-      const [appsResponse, categoriesResponse, statsResponse] =
-        await Promise.all([
-          getApps(category),
-          getCategories(),
-          getStoreStats()
-        ]);
+      const [
+        appsResponse,
+        categoriesResponse,
+        statsResponse
+      ] = await Promise.all([
+        getApps(category),
+        getCategories(),
+        getStoreStats()
+      ]);
 
       const appList = Array.isArray(appsResponse)
         ? appsResponse
@@ -93,7 +101,7 @@ export default function AppsPage() {
       ]
         .filter(Boolean)
         .some((value) =>
-          value.toLowerCase().includes(query)
+          String(value).toLowerCase().includes(query)
         )
     );
   }, [apps, search]);
@@ -136,6 +144,7 @@ export default function AppsPage() {
 
         <div className="stat-card">
           <Smartphone size={25} />
+
           <div>
             <strong>{stats.totalApps}</strong>
             <span>Available Apps</span>
@@ -144,6 +153,7 @@ export default function AppsPage() {
 
         <div className="stat-card">
           <Download size={25} />
+
           <div>
             <strong>{stats.totalDownloads}</strong>
             <span>Total Downloads</span>
@@ -259,6 +269,7 @@ export default function AppsPage() {
 
             <div className="app-meta">
               <span>Version: {app.version}</span>
+
               <span>
                 {app.downloads || 0} Downloads
               </span>
@@ -280,7 +291,9 @@ export default function AppsPage() {
               ) : (
                 <>
                   <Download size={17} />
-                  {app.apkUrl ? "Download APK" : "APK उपलब्ध नहीं"}
+                  {app.apkUrl
+                    ? "Download APK"
+                    : "APK उपलब्ध नहीं"}
                 </>
               )}
             </button>
