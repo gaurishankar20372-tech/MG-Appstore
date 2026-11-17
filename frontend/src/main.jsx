@@ -5,6 +5,7 @@ import App from "./App.jsx";
 import { AuthProvider } from "./auth.jsx";
 
 import "./index.css";
+import "./dashboard.css";
 
 ReactDOM.createRoot(
   document.getElementById("root")
