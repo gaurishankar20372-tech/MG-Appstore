@@ -17,6 +17,7 @@ import {
 
 import { useAuth } from "./auth.jsx";
 import AppsPage from "./AppsPage.jsx";
+import DownloadsPage from "./DownloadsPage.jsx";
 
 export default function App() {
   const {
@@ -30,12 +31,12 @@ export default function App() {
 
   const [activePage, setActivePage] = useState("home");
   const [menuOpen, setMenuOpen] = useState(false);
-  const [search, setSearch] = useState("");
 
   const [authMode, setAuthMode] = useState("login");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
   const [message, setMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
@@ -63,6 +64,7 @@ export default function App() {
       ["downloads", "developer", "admin"].includes(page) &&
       !isAuthenticated
     ) {
+      setAuthMode("login");
       setActivePage("login");
       setMenuOpen(false);
       return;
@@ -93,8 +95,15 @@ export default function App() {
       return;
     }
 
-    if (password.length < (authMode === "register" ? 8 : 1)) {
-      setMessage("Password कम-से-कम 8 अक्षरों का होना चाहिए।");
+    if (
+      password.length <
+      (authMode === "register" ? 8 : 1)
+    ) {
+      setMessage(
+        authMode === "register"
+          ? "Password कम-से-कम 8 अक्षरों का होना चाहिए।"
+          : "कृपया Password भरें।"
+      );
       return;
     }
 
@@ -133,7 +142,9 @@ export default function App() {
         <User size={45} />
 
         <h3>
-          {authMode === "login" ? "Welcome Back!" : "Create Account"}
+          {authMode === "login"
+            ? "Welcome Back!"
+            : "Create Account"}
         </h3>
 
         <form
@@ -216,6 +227,7 @@ export default function App() {
     <div className="app-container">
 
       <header className="topbar">
+
         <div className="brand">
           <div className="brand-icon">
             <Store size={25} />
@@ -230,15 +242,25 @@ export default function App() {
         <button
           className="menu-button"
           onClick={() => setMenuOpen(!menuOpen)}
+          aria-label="Toggle menu"
         >
           {menuOpen ? <X /> : <Menu />}
         </button>
 
         {isAuthenticated ? (
-          <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+          <div
+            style={{
+              display: "flex",
+              gap: "10px",
+              alignItems: "center"
+            }}
+          >
             <span>{user?.name}</span>
 
-            <button className="login-button" onClick={handleLogout}>
+            <button
+              className="login-button"
+              onClick={handleLogout}
+            >
               <LogOut size={17} />
               Logout
             </button>
@@ -248,6 +270,7 @@ export default function App() {
             className="login-button"
             onClick={() => {
               setAuthMode("login");
+              setMessage("");
               setActivePage("login");
             }}
           >
@@ -255,12 +278,19 @@ export default function App() {
             Sign In
           </button>
         )}
+
       </header>
 
       <div className="main-layout">
 
-        <aside className={`sidebar ${menuOpen ? "show-sidebar" : ""}`}>
-          <div className="sidebar-heading">MENU</div>
+        <aside
+          className={`sidebar ${
+            menuOpen ? "show-sidebar" : ""
+          }`}
+        >
+          <div className="sidebar-heading">
+            MENU
+          </div>
 
           {navigation.map((item) => {
             const Icon = item.icon;
@@ -283,14 +313,20 @@ export default function App() {
             <Smartphone size={18} />
             <span>MG AppStore v1.0</span>
           </div>
+
         </aside>
 
         <main className="content">
 
           <div className="page-heading">
             <div>
-              <p className="welcome-text">WELCOME TO MG APPSTORE</p>
-              <h2>{pageTitles[activePage]}</h2>
+              <p className="welcome-text">
+                WELCOME TO MG APPSTORE
+              </p>
+
+              <h2>
+                {pageTitles[activePage]}
+              </h2>
             </div>
           </div>
 
@@ -301,6 +337,7 @@ export default function App() {
           {activePage === "home" && (
             <>
               <section className="hero-section">
+
                 <div className="hero-content">
                   <span className="hero-label">
                     DISCOVER • DOWNLOAD • EXPLORE
@@ -327,6 +364,7 @@ export default function App() {
                 <div className="hero-graphic">
                   <Store size={100} strokeWidth={1.2} />
                 </div>
+
               </section>
 
               <section className="search-section">
@@ -334,12 +372,8 @@ export default function App() {
 
                 <input
                   type="search"
-                  placeholder="ऐप का नाम खोजें..."
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") changePage("apps");
-                  }}
+                  placeholder="ऐप्स देखने के लिए Explore Apps दबाएँ"
+                  readOnly
                 />
 
                 <button onClick={() => changePage("apps")}>
@@ -351,38 +385,41 @@ export default function App() {
                 <h3>Explore Categories</h3>
 
                 <div className="category-grid">
-                  {["AI & Technology", "Education", "Games", "Tools"].map(
-                    (category) => (
-                      <button
-                        className="category-card"
-                        key={category}
-                        onClick={() => changePage("apps")}
-                      >
-                        <Grid3X3 size={24} />
-                        <span>{category}</span>
-                      </button>
-                    )
-                  )}
+                  {[
+                    "AI & Technology",
+                    "Education",
+                    "Games",
+                    "Tools"
+                  ].map((category) => (
+                    <button
+                      className="category-card"
+                      key={category}
+                      onClick={() => changePage("apps")}
+                    >
+                      <Grid3X3 size={24} />
+                      <span>{category}</span>
+                    </button>
+                  ))}
                 </div>
               </section>
             </>
           )}
 
-          {activePage === "apps" && <AppsPage />}
+          {activePage === "apps" && (
+            <AppsPage />
+          )}
 
           {activePage === "downloads" && (
-            <section className="empty-section">
-              <Download size={48} />
-              <h3>My Downloads</h3>
-              <p>आपके डाउनलोड किए गए ऐप्स यहाँ दिखाई देंगे।</p>
-            </section>
+            <DownloadsPage />
           )}
 
           {activePage === "developer" && (
             <section className="empty-section">
               <Code2 size={48} />
               <h3>Developer Dashboard</h3>
-              <p>यहाँ डेवलपर अपने ऐप्स मैनेज कर सकेंगे।</p>
+              <p>
+                यहाँ डेवलपर अपने ऐप्स मैनेज कर सकेंगे।
+              </p>
             </section>
           )}
 
@@ -390,7 +427,9 @@ export default function App() {
             <section className="empty-section">
               <ShieldCheck size={48} />
               <h3>Admin Panel</h3>
-              <p>यहाँ ऐप्स की समीक्षा और Approval होगा।</p>
+              <p>
+                यहाँ ऐप्स की समीक्षा और Approval होगा।
+              </p>
             </section>
           )}
 
@@ -402,7 +441,9 @@ export default function App() {
           </footer>
 
         </main>
+
       </div>
+
     </div>
   );
 }
