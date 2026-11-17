@@ -16,7 +16,6 @@ import {
 } from "lucide-react";
 
 import { useAuth } from "./auth.jsx";
-
 import AppsPage from "./AppsPage.jsx";
 import DownloadsPage from "./DownloadsPage.jsx";
 import DeveloperPage from "./DeveloperPage.jsx";
@@ -72,7 +71,7 @@ export default function App() {
       user?.role !== "developer" &&
       user?.role !== "admin"
     ) {
-      alert("Developer Dashboard के लिए Developer अकाउंट जरूरी है।");
+      alert("Developer अकाउंट जरूरी है।");
     } else {
       setActivePage(page);
     }
@@ -82,7 +81,6 @@ export default function App() {
 
   async function handleAuth(event) {
     event.preventDefault();
-
     setAuthError("");
     setAuthLoading(true);
 
@@ -92,7 +90,7 @@ export default function App() {
         : await login(email, password);
 
       if (!result.success) {
-        setAuthError(result.message || "Authentication असफल रहा।");
+        setAuthError(result.message || "लॉगिन असफल रहा।");
         return;
       }
 
@@ -107,6 +105,8 @@ export default function App() {
       } else {
         setActivePage("home");
       }
+    } catch (err) {
+      setAuthError(err.message || "कनेक्शन में समस्या हुई।");
     } finally {
       setAuthLoading(false);
     }
@@ -151,10 +151,7 @@ export default function App() {
         </button>
 
         {isAuthenticated ? (
-          <button
-            className="login-button"
-            onClick={handleLogout}
-          >
+          <button className="login-button" onClick={handleLogout}>
             <LogOut size={17} />
             Logout
           </button>
@@ -204,13 +201,8 @@ export default function App() {
 
           <div className="page-heading">
             <div>
-              <p className="welcome-text">
-                WELCOME TO MG APPSTORE
-              </p>
-
-              <h2>
-                {pageTitles[activePage] || "MG AppStore"}
-              </h2>
+              <p className="welcome-text">WELCOME TO MG APPSTORE</p>
+              <h2>{pageTitles[activePage] || "MG AppStore"}</h2>
             </div>
           </div>
 
@@ -219,7 +211,6 @@ export default function App() {
               <section className="hero-section">
 
                 <div className="hero-content">
-
                   <span className="hero-label">
                     DISCOVER • DOWNLOAD • EXPLORE
                   </span>
@@ -240,7 +231,6 @@ export default function App() {
                   >
                     Explore Apps
                   </button>
-
                 </div>
 
                 <div className="hero-graphic">
@@ -250,7 +240,6 @@ export default function App() {
               </section>
 
               <section className="search-section">
-
                 <Search size={20} />
 
                 <input
@@ -268,58 +257,41 @@ export default function App() {
                 <button onClick={() => changePage("apps")}>
                   Search
                 </button>
-
               </section>
 
               <section className="quick-section">
-
                 <h3>Explore Categories</h3>
 
                 <div className="category-grid">
-
-                  {[
-                    "AI & Technology",
-                    "Education",
-                    "Games",
-                    "Tools"
-                  ].map((category) => (
-                    <button
-                      className="category-card"
-                      key={category}
-                      onClick={() => changePage("apps")}
-                    >
-                      <Grid3X3 size={24} />
-                      <span>{category}</span>
-                    </button>
-                  ))}
-
+                  {["AI & Technology", "Education", "Games", "Tools"].map(
+                    (category) => (
+                      <button
+                        className="category-card"
+                        key={category}
+                        onClick={() => changePage("apps")}
+                      >
+                        <Grid3X3 size={24} />
+                        <span>{category}</span>
+                      </button>
+                    )
+                  )}
                 </div>
-
               </section>
             </>
           )}
 
-          {activePage === "apps" && (
-            <AppsPage />
-          )}
+          {activePage === "apps" && <AppsPage />}
 
-          {activePage === "downloads" && (
-            <DownloadsPage />
-          )}
+          {activePage === "downloads" && <DownloadsPage />}
 
-          {activePage === "developer" && (
-            <DeveloperPage />
-          )}
+          {activePage === "developer" && <DeveloperPage />}
 
-          {activePage === "admin" && (
-            <AdminPage />
-          )}
+          {activePage === "admin" && <AdminPage />}
 
           {activePage === "login" && (
             <section className="auth-section">
 
               <div className="auth-card">
-
                 <User size={42} />
 
                 <h2>
@@ -390,7 +362,6 @@ export default function App() {
                     ? "Already have an account? Login"
                     : "Create New Account"}
                 </button>
-
               </div>
 
             </section>
@@ -402,9 +373,7 @@ export default function App() {
           </footer>
 
         </main>
-
       </div>
-
     </div>
   );
 }
