@@ -117,6 +117,12 @@ export default function App() {
     setActivePage("home");
   }
 
+  function handleSearch(event) {
+    event.preventDefault();
+    setActivePage("apps");
+    setMenuOpen(false);
+  }
+
   if (loading) {
     return (
       <div className="empty-section">
@@ -239,7 +245,10 @@ export default function App() {
 
               </section>
 
-              <section className="search-section">
+              <form
+                className="search-section"
+                onSubmit={handleSearch}
+              >
                 <Search size={20} />
 
                 <input
@@ -247,17 +256,12 @@ export default function App() {
                   placeholder="ऐप का नाम खोजें..."
                   value={search}
                   onChange={(event) => setSearch(event.target.value)}
-                  onKeyDown={(event) => {
-                    if (event.key === "Enter") {
-                      changePage("apps");
-                    }
-                  }}
                 />
 
-                <button onClick={() => changePage("apps")}>
+                <button type="submit">
                   Search
                 </button>
-              </section>
+              </form>
 
               <section className="quick-section">
                 <h3>Explore Categories</h3>
@@ -280,7 +284,9 @@ export default function App() {
             </>
           )}
 
-          {activePage === "apps" && <AppsPage />}
+          {activePage === "apps" && (
+            <AppsPage initialSearch={search} />
+          )}
 
           {activePage === "downloads" && <DownloadsPage />}
 
