@@ -2,18 +2,22 @@ import { useEffect, useState } from "react";
 
 import {
   Download,
-  Smartphone,
   RefreshCw,
-  PackageOpen
+  Smartphone,
+  PackageOpen,
+  Calendar,
+  History
 } from "lucide-react";
 
 import {
-  getDownloadHistory
+  getDownloadHistory,
+  getAppDetails
 } from "./storeApi";
 
 export default function DownloadsPage() {
   const [downloads, setDownloads] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [downloadingId, setDownloadingId] = useState(null);
   const [error, setError] = useState("");
 
   async function loadDownloads() {
@@ -27,14 +31,14 @@ export default function DownloadsPage() {
         ? response
         : response.downloads ||
           response.history ||
-          response.records ||
+          response.data?.downloads ||
           [];
 
       setDownloads(records);
 
     } catch (err) {
       setError(
-        err.message || "Download History लोड नहीं हो पाई।"
+        err.message || "Download History लोड नहीं हो सकी।"
       );
     } finally {
       setLoading(false);
@@ -45,15 +49,49 @@ export default function DownloadsPage() {
     loadDownloads();
   }, []);
 
-  function downloadAgain(item) {
-    if (!item.appId) {
-      alert("इस ऐप की जानकारी उपलब्ध नहीं है।");
-      return;
+  async function downloadAgain(appId) {
+    setDownloadingId(appId);
+    setError("");
+
+    try {
+      const response = await getAppDetails(appId);
+
+      const app =
+        response.app ||
+        response.data?.app ||
+        response;
+
+      if (!app?.apkUrl) {
+        throw new Error("इस ऐप की APK अभी उपलब्ध नहीं है।");
+      }
+
+      window.location.href = app.apkUrl;
+
+    } catch (err) {
+      setError(
+        err.message || "Download शुरू नहीं हो पाया।"
+      );
+    } finally {
+      setDownloadingId(null);
+    }
+  }
+
+  function formatDate(dateValue) {
+    if (!dateValue) return "तारीख उपलब्ध नहीं";
+
+    const date = new Date(dateValue);
+
+    if (Number.isNaN(date.getTime())) {
+      return "तारीख उपलब्ध नहीं";
     }
 
-    alert(
-      "दोबारा डाउनलोड करने के लिए Apps Catalogue खोलें और ऐप खोजें।"
-    );
+    return date.toLocaleString("en-IN", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit"
+    });
   }
 
   if (loading) {
@@ -68,11 +106,15 @@ export default function DownloadsPage() {
   return (
     <section className="downloads-page">
 
-      <div className="downloads-heading">
+      <div className="downloads-header">
         <div>
-          <h3>My Download History</h3>
+          <h3>
+            <History size={22} />
+            My Downloads
+          </h3>
+
           <p>
-            आपके डाउनलोड किए गए ऐप्स की जानकारी।
+            आपके डाउनलोड किए गए ऐप्स की पूरी हिस्ट्री।
           </p>
         </div>
 
@@ -87,69 +129,87 @@ export default function DownloadsPage() {
 
       {error && (
         <div className="error-message">
-          <p>{error}</p>
-
-          <button onClick={loadDownloads}>
-            दोबारा कोशिश करें
-          </button>
+          {error}
         </div>
       )}
 
-      {!error && downloads.length === 0 && (
+      <div className="downloads-count">
+        <Download size={22} />
+
+        <div>
+          <strong>{downloads.length}</strong>
+          <span>Total Download Records</span>
+        </div>
+      </div>
+
+      {downloads.length === 0 ? (
         <div className="empty-section">
           <PackageOpen size={48} />
 
           <h3>अभी कोई Download नहीं है</h3>
 
           <p>
-            Apps Catalogue से अपना पसंदीदा ऐप डाउनलोड करें।
+            आपके डाउनलोड किए गए ऐप्स यहाँ दिखाई देंगे।
           </p>
         </div>
+      ) : (
+        <div className="downloads-list">
+
+          {downloads.map((item, index) => {
+            const appId = item.appId ?? item.app_id;
+
+            return (
+              <article
+                className="download-card"
+                key={item.id || `${appId}-${index}`}
+              >
+
+                <div className="download-app-icon">
+                  <Smartphone size={29} />
+                </div>
+
+                <div className="download-app-info">
+
+                  <h3>
+                    {item.appName ||
+                     item.app_name ||
+                     "Unknown App"}
+                  </h3>
+
+                  <p>
+                    <Calendar size={14} />
+                    {formatDate(
+                      item.downloadedAt ||
+                      item.downloaded_at
+                    )}
+                  </p>
+
+                  <span>
+                    App ID: {appId ?? "N/A"}
+                  </span>
+
+                </div>
+
+                <button
+                  className="download-again-button"
+                  disabled={
+                    !appId || downloadingId === appId
+                  }
+                  onClick={() => downloadAgain(appId)}
+                >
+                  <Download size={17} />
+
+                  {downloadingId === appId
+                    ? "Loading..."
+                    : "Download Again"}
+                </button>
+
+              </article>
+            );
+          })}
+
+        </div>
       )}
-
-      <div className="downloads-list">
-
-        {downloads.map((item) => (
-          <article
-            className="download-card"
-            key={item.id}
-          >
-
-            <div className="download-icon">
-              <Smartphone size={28} />
-            </div>
-
-            <div className="download-info">
-              <h3>
-                {item.appName || "Unknown App"}
-              </h3>
-
-              <p>
-                Downloaded:{" "}
-                {item.downloadedAt
-                  ? new Date(
-                      item.downloadedAt
-                    ).toLocaleString()
-                  : "Date unavailable"}
-              </p>
-
-              <small>
-                App ID: {item.appId}
-              </small>
-            </div>
-
-            <button
-              className="download-again-button"
-              onClick={() => downloadAgain(item)}
-            >
-              <Download size={17} />
-              Details
-            </button>
-
-          </article>
-        ))}
-
-      </div>
 
     </section>
   );
