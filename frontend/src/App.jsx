@@ -16,29 +16,32 @@ import {
 } from "lucide-react";
 
 import { useAuth } from "./auth.jsx";
+
 import AppsPage from "./AppsPage.jsx";
 import DownloadsPage from "./DownloadsPage.jsx";
+import DeveloperPage from "./DeveloperPage.jsx";
+import AdminPage from "./AdminPage.jsx";
 
 export default function App() {
   const {
     user,
-    loading,
     isAuthenticated,
+    loading,
+    logout,
     login,
-    register,
-    logout
+    register
   } = useAuth();
 
   const [activePage, setActivePage] = useState("home");
   const [menuOpen, setMenuOpen] = useState(false);
+  const [search, setSearch] = useState("");
 
-  const [authMode, setAuthMode] = useState("login");
-  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
-  const [message, setMessage] = useState("");
-  const [submitting, setSubmitting] = useState(false);
+  const [name, setName] = useState("");
+  const [isRegister, setIsRegister] = useState(false);
+  const [authError, setAuthError] = useState("");
+  const [authLoading, setAuthLoading] = useState(false);
 
   const navigation = [
     { id: "home", label: "होम", icon: Home },
@@ -54,171 +57,71 @@ export default function App() {
     downloads: "मेरे डाउनलोड",
     developer: "डेवलपर डैशबोर्ड",
     admin: "एडमिन पैनल",
-    login: "लॉगिन / रजिस्ट्रेशन"
+    login: "Sign In / Register"
   };
 
   function changePage(page) {
-    setMessage("");
+    const protectedPages = ["downloads", "developer", "admin"];
 
-    if (
-      ["downloads", "developer", "admin"].includes(page) &&
-      !isAuthenticated
-    ) {
-      setAuthMode("login");
+    if (protectedPages.includes(page) && !isAuthenticated) {
       setActivePage("login");
-      setMenuOpen(false);
-      return;
+    } else if (page === "admin" && user?.role !== "admin") {
+      alert("यह पेज केवल Admin के लिए है।");
+    } else if (
+      page === "developer" &&
+      user?.role !== "developer" &&
+      user?.role !== "admin"
+    ) {
+      alert("Developer Dashboard के लिए Developer अकाउंट जरूरी है।");
+    } else {
+      setActivePage(page);
     }
 
-    if (page === "admin" && user?.role !== "admin") {
-      setMessage("इस पेज को देखने की अनुमति नहीं है।");
-      setMenuOpen(false);
-      return;
-    }
-
-    if (page === "developer" && user?.role !== "developer") {
-      setMessage("Developer अकाउंट आवश्यक है।");
-      setMenuOpen(false);
-      return;
-    }
-
-    setActivePage(page);
     setMenuOpen(false);
   }
 
   async function handleAuth(event) {
     event.preventDefault();
-    setMessage("");
 
-    if (authMode === "register" && !name.trim()) {
-      setMessage("कृपया अपना नाम भरें।");
-      return;
-    }
-
-    if (
-      password.length <
-      (authMode === "register" ? 8 : 1)
-    ) {
-      setMessage(
-        authMode === "register"
-          ? "Password कम-से-कम 8 अक्षरों का होना चाहिए।"
-          : "कृपया Password भरें।"
-      );
-      return;
-    }
-
-    setSubmitting(true);
+    setAuthError("");
+    setAuthLoading(true);
 
     try {
-      const result =
-        authMode === "login"
-          ? await login(email.trim(), password)
-          : await register(name.trim(), email.trim(), password);
+      const result = isRegister
+        ? await register(name, email, password)
+        : await login(email, password);
 
       if (!result.success) {
-        setMessage(result.message || "प्रक्रिया असफल रही।");
+        setAuthError(result.message || "Authentication असफल रहा।");
         return;
       }
 
+      setEmail("");
       setPassword("");
       setName("");
-      setMessage("सफलतापूर्वक पूरा हुआ!");
-      setActivePage("home");
 
+      if (result.user?.role === "admin") {
+        setActivePage("admin");
+      } else if (result.user?.role === "developer") {
+        setActivePage("developer");
+      } else {
+        setActivePage("home");
+      }
     } finally {
-      setSubmitting(false);
+      setAuthLoading(false);
     }
   }
 
   async function handleLogout() {
     await logout();
     setActivePage("home");
-    setMessage("आप Logout हो गए हैं।");
-  }
-
-  function renderAuthPage() {
-    return (
-      <section className="empty-section">
-        <User size={45} />
-
-        <h3>
-          {authMode === "login"
-            ? "Welcome Back!"
-            : "Create Account"}
-        </h3>
-
-        <form
-          onSubmit={handleAuth}
-          style={{
-            display: "grid",
-            gap: "14px",
-            maxWidth: "400px",
-            margin: "20px auto"
-          }}
-        >
-          {authMode === "register" && (
-            <input
-              style={inputStyle}
-              placeholder="आपका नाम"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-            />
-          )}
-
-          <input
-            style={inputStyle}
-            type="email"
-            placeholder="Email Address"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-
-          <input
-            style={inputStyle}
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-
-          <button
-            className="primary-button"
-            disabled={submitting}
-          >
-            {submitting
-              ? "कृपया प्रतीक्षा करें..."
-              : authMode === "login"
-                ? "Login"
-                : "Create Account"}
-          </button>
-        </form>
-
-        {message && <p>{message}</p>}
-
-        <button
-          style={linkStyle}
-          onClick={() => {
-            setAuthMode(
-              authMode === "login" ? "register" : "login"
-            );
-            setMessage("");
-          }}
-        >
-          {authMode === "login"
-            ? "नया अकाउंट बनाएँ"
-            : "पहले से अकाउंट है? Login करें"}
-        </button>
-      </section>
-    );
   }
 
   if (loading) {
     return (
       <div className="empty-section">
-        <p>MG AppStore लोड हो रहा है...</p>
+        <Store size={40} />
+        <h3>MG AppStore लोड हो रहा है...</h3>
       </div>
     );
   }
@@ -248,31 +151,17 @@ export default function App() {
         </button>
 
         {isAuthenticated ? (
-          <div
-            style={{
-              display: "flex",
-              gap: "10px",
-              alignItems: "center"
-            }}
+          <button
+            className="login-button"
+            onClick={handleLogout}
           >
-            <span>{user?.name}</span>
-
-            <button
-              className="login-button"
-              onClick={handleLogout}
-            >
-              <LogOut size={17} />
-              Logout
-            </button>
-          </div>
+            <LogOut size={17} />
+            Logout
+          </button>
         ) : (
           <button
             className="login-button"
-            onClick={() => {
-              setAuthMode("login");
-              setMessage("");
-              setActivePage("login");
-            }}
+            onClick={() => changePage("login")}
           >
             <User size={17} />
             Sign In
@@ -283,14 +172,9 @@ export default function App() {
 
       <div className="main-layout">
 
-        <aside
-          className={`sidebar ${
-            menuOpen ? "show-sidebar" : ""
-          }`}
-        >
-          <div className="sidebar-heading">
-            MENU
-          </div>
+        <aside className={`sidebar ${menuOpen ? "show-sidebar" : ""}`}>
+
+          <div className="sidebar-heading">MENU</div>
 
           {navigation.map((item) => {
             const Icon = item.icon;
@@ -325,20 +209,17 @@ export default function App() {
               </p>
 
               <h2>
-                {pageTitles[activePage]}
+                {pageTitles[activePage] || "MG AppStore"}
               </h2>
             </div>
           </div>
-
-          {message && activePage !== "login" && (
-            <p>{message}</p>
-          )}
 
           {activePage === "home" && (
             <>
               <section className="hero-section">
 
                 <div className="hero-content">
+
                   <span className="hero-label">
                     DISCOVER • DOWNLOAD • EXPLORE
                   </span>
@@ -359,6 +240,7 @@ export default function App() {
                   >
                     Explore Apps
                   </button>
+
                 </div>
 
                 <div className="hero-graphic">
@@ -368,23 +250,33 @@ export default function App() {
               </section>
 
               <section className="search-section">
+
                 <Search size={20} />
 
                 <input
                   type="search"
-                  placeholder="ऐप्स देखने के लिए Explore Apps दबाएँ"
-                  readOnly
+                  placeholder="ऐप का नाम खोजें..."
+                  value={search}
+                  onChange={(event) => setSearch(event.target.value)}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter") {
+                      changePage("apps");
+                    }
+                  }}
                 />
 
                 <button onClick={() => changePage("apps")}>
                   Search
                 </button>
+
               </section>
 
               <section className="quick-section">
+
                 <h3>Explore Categories</h3>
 
                 <div className="category-grid">
+
                   {[
                     "AI & Technology",
                     "Education",
@@ -400,7 +292,9 @@ export default function App() {
                       <span>{category}</span>
                     </button>
                   ))}
+
                 </div>
+
               </section>
             </>
           )}
@@ -414,26 +308,93 @@ export default function App() {
           )}
 
           {activePage === "developer" && (
-            <section className="empty-section">
-              <Code2 size={48} />
-              <h3>Developer Dashboard</h3>
-              <p>
-                यहाँ डेवलपर अपने ऐप्स मैनेज कर सकेंगे।
-              </p>
-            </section>
+            <DeveloperPage />
           )}
 
           {activePage === "admin" && (
-            <section className="empty-section">
-              <ShieldCheck size={48} />
-              <h3>Admin Panel</h3>
-              <p>
-                यहाँ ऐप्स की समीक्षा और Approval होगा।
-              </p>
-            </section>
+            <AdminPage />
           )}
 
-          {activePage === "login" && renderAuthPage()}
+          {activePage === "login" && (
+            <section className="auth-section">
+
+              <div className="auth-card">
+
+                <User size={42} />
+
+                <h2>
+                  {isRegister ? "Create Account" : "Welcome Back"}
+                </h2>
+
+                <p>
+                  MG AppStore में {isRegister ? "नया अकाउंट बनाएँ" : "लॉगिन करें"}
+                </p>
+
+                {authError && (
+                  <div className="error-message">
+                    {authError}
+                  </div>
+                )}
+
+                <form onSubmit={handleAuth}>
+
+                  {isRegister && (
+                    <input
+                      type="text"
+                      placeholder="Your Name"
+                      value={name}
+                      onChange={(event) => setName(event.target.value)}
+                      required
+                    />
+                  )}
+
+                  <input
+                    type="email"
+                    placeholder="Email Address"
+                    value={email}
+                    onChange={(event) => setEmail(event.target.value)}
+                    required
+                  />
+
+                  <input
+                    type="password"
+                    placeholder="Password"
+                    value={password}
+                    onChange={(event) => setPassword(event.target.value)}
+                    minLength={8}
+                    required
+                  />
+
+                  <button
+                    type="submit"
+                    className="primary-button"
+                    disabled={authLoading}
+                  >
+                    {authLoading
+                      ? "Please Wait..."
+                      : isRegister
+                        ? "Create Account"
+                        : "Login"}
+                  </button>
+
+                </form>
+
+                <button
+                  className="text-button"
+                  onClick={() => {
+                    setIsRegister(!isRegister);
+                    setAuthError("");
+                  }}
+                >
+                  {isRegister
+                    ? "Already have an account? Login"
+                    : "Create New Account"}
+                </button>
+
+              </div>
+
+            </section>
+          )}
 
           <footer className="footer">
             <p>© 2026 MG AppStore</p>
@@ -447,22 +408,3 @@ export default function App() {
     </div>
   );
 }
-
-const inputStyle = {
-  width: "100%",
-  padding: "13px",
-  borderRadius: "8px",
-  border: "1px solid #39465c",
-  background: "#111c30",
-  color: "#ffffff",
-  fontSize: "15px",
-  boxSizing: "border-box"
-};
-
-const linkStyle = {
-  border: "none",
-  background: "transparent",
-  color: "#60a5fa",
-  cursor: "pointer",
-  fontSize: "15px"
-};
