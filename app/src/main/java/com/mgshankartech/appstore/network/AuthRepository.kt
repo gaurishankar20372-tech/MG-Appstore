@@ -4,10 +4,9 @@ import com.mgshankartech.appstore.models.AuthResponse
 import com.mgshankartech.appstore.models.LoginRequest
 import com.mgshankartech.appstore.models.RegisterRequest
 
-class AuthRepository {
-
-    private val apiService: AuthApiService =
-        ApiConfig.retrofit.create(AuthApiService::class.java)
+class AuthRepository(
+    private val apiService: AuthApiService
+) {
 
     // Register new user
     suspend fun register(
@@ -84,3 +83,4 @@ class AuthRepository {
             )
         }
     }
+}
