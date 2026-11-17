@@ -15,10 +15,10 @@ admin_bp = Blueprint(
 def get_admin():
     user_id = get_jwt_identity()
 
-    user = db.session.get(
-        User,
-        int(user_id)
-    )
+    try:
+        user = db.session.get(User, int(user_id))
+    except (ValueError, TypeError):
+        return None
 
     if not user or user.role != "admin":
         return None
@@ -70,10 +70,7 @@ def approve_app(app_id):
             "message": "Admin access required"
         }), 403
 
-    app = db.session.get(
-        StoreApp,
-        app_id
-    )
+    app = db.session.get(StoreApp, app_id)
 
     if not app:
         return jsonify({
@@ -82,7 +79,6 @@ def approve_app(app_id):
         }), 404
 
     app.status = "approved"
-
     db.session.commit()
 
     return jsonify({
@@ -108,10 +104,7 @@ def reject_app(app_id):
             "message": "Admin access required"
         }), 403
 
-    app = db.session.get(
-        StoreApp,
-        app_id
-    )
+    app = db.session.get(StoreApp, app_id)
 
     if not app:
         return jsonify({
@@ -120,11 +113,66 @@ def reject_app(app_id):
         }), 404
 
     app.status = "rejected"
-
     db.session.commit()
 
     return jsonify({
         "success": True,
         "message": "App rejected",
         "app": app.to_dict()
+    }), 200
+
+
+# किसी User को Developer बनाना
+@admin_bp.route(
+    "/users/<int:user_id>/make-developer",
+    methods=["POST"]
+)
+@jwt_required()
+def make_developer(user_id):
+
+    admin = get_admin()
+
+    if not admin:
+        return jsonify({
+            "success": False,
+            "message": "Admin access required"
+        }), 403
+
+    user = db.session.get(User, user_id)
+
+    if not user:
+        return jsonify({
+            "success": False,
+            "message": "User not found"
+        }), 404
+
+    if user.role == "admin":
+        return jsonify({
+            "success": False,
+            "message": "Admin role cannot be changed here"
+        }), 400
+
+    if user.role == "developer":
+        return jsonify({
+            "success": True,
+            "message": "User is already a developer",
+            "user": user.to_dict()
+        }), 200
+
+    user.role = "developer"
+
+    try:
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+
+        return jsonify({
+            "success": False,
+            "message": "Could not update user role"
+        }), 500
+
+    return jsonify({
+        "success": True,
+        "message": "User successfully promoted to developer",
+        "user": user.to_dict()
     }), 200
