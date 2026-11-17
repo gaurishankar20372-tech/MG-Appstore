@@ -15,23 +15,38 @@ developer_bp = Blueprint(
 def get_current_user():
     user_id = get_jwt_identity()
 
-    return db.session.get(
-        User,
-        int(user_id)
-    )
+    try:
+        return db.session.get(User, int(user_id))
+    except (ValueError, TypeError):
+        return None
+
+
+def check_developer_access(user):
+    if not user:
+        return jsonify({
+            "success": False,
+            "message": "User not found"
+        }), 404
+
+    if user.role not in ("developer", "admin"):
+        return jsonify({
+            "success": False,
+            "message": "Developer access required"
+        }), 403
+
+    return None
 
 
 # Developer Dashboard
 @developer_bp.route("/dashboard", methods=["GET"])
 @jwt_required()
 def dashboard():
+
     user = get_current_user()
 
-    if not user:
-        return jsonify({
-            "success": False,
-            "message": "User not found"
-        }), 404
+    access_error = check_developer_access(user)
+    if access_error:
+        return access_error
 
     apps = StoreApp.query.filter_by(
         developer_id=user.id
@@ -67,29 +82,20 @@ def dashboard():
 @developer_bp.route("/apps", methods=["POST"])
 @jwt_required()
 def upload_app():
+
     user = get_current_user()
 
-    if not user:
-        return jsonify({
-            "success": False,
-            "message": "User not found"
-        }), 404
+    access_error = check_developer_access(user)
+    if access_error:
+        return access_error
 
     data = request.get_json(silent=True) or {}
 
     name = str(data.get("name", "")).strip()
-    description = str(
-        data.get("description", "")
-    ).strip()
-    category = str(
-        data.get("category", "")
-    ).strip()
-    version = str(
-        data.get("version", "")
-    ).strip()
-    package_name = str(
-        data.get("packageName", "")
-    ).strip()
+    description = str(data.get("description", "")).strip()
+    category = str(data.get("category", "")).strip()
+    version = str(data.get("version", "")).strip()
+    package_name = str(data.get("packageName", "")).strip()
 
     if not all([
         name,
@@ -123,8 +129,17 @@ def upload_app():
         status="pending"
     )
 
-    db.session.add(new_app)
-    db.session.commit()
+    try:
+        db.session.add(new_app)
+        db.session.commit()
+
+    except Exception:
+        db.session.rollback()
+
+        return jsonify({
+            "success": False,
+            "message": "Could not submit app"
+        }), 500
 
     return jsonify({
         "success": True,
@@ -140,13 +155,12 @@ def upload_app():
 )
 @jwt_required()
 def developer_app_details(app_id):
+
     user = get_current_user()
 
-    if not user:
-        return jsonify({
-            "success": False,
-            "message": "User not found"
-        }), 404
+    access_error = check_developer_access(user)
+    if access_error:
+        return access_error
 
     app = StoreApp.query.filter_by(
         id=app_id,
