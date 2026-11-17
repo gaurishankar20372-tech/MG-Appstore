@@ -5,10 +5,9 @@ sealed class ApiResult<out T> {
     data class Error(val message: String) : ApiResult<Nothing>()
 }
 
-class StoreRepository {
-
-    private val apiService: ApiService =
-        ApiConfig.retrofit.create(ApiService::class.java)
+class StoreRepository(
+    private val apiService: ApiService
+) {
 
     // Get applications
     suspend fun getApps(
@@ -33,9 +32,7 @@ class StoreRepository {
                     ApiResult.Error("Empty server response")
                 }
             } else {
-                ApiResult.Error(
-                    "Server error: ${response.code()}"
-                )
+                ApiResult.Error("Server error: ${response.code()}")
             }
 
         } catch (e: Exception) {
@@ -62,9 +59,7 @@ class StoreRepository {
                     ApiResult.Error("Application details not found")
                 }
             } else {
-                ApiResult.Error(
-                    "Server error: ${response.code()}"
-                )
+                ApiResult.Error("Server error: ${response.code()}")
             }
 
         } catch (e: Exception) {
@@ -89,9 +84,7 @@ class StoreRepository {
                     ApiResult.Error("Categories not found")
                 }
             } else {
-                ApiResult.Error(
-                    "Server error: ${response.code()}"
-                )
+                ApiResult.Error("Server error: ${response.code()}")
             }
 
         } catch (e: Exception) {
